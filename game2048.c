@@ -16,6 +16,69 @@ int totalScore;
 
 
 
+// check if there can be another operation
+// when the board is full
+bool canOperate(){
+    // check if there is a cell with same num on the right/down side
+    // of each cell
+    int i, j;
+    for (i=0; i<4; i++) {
+        for (j=0; j<4; j++) {
+            if (j<3 && board[i][j] == board[i][j+1]){
+                return true;
+            }
+            if (i<3 && board[i][j] == board[i+1][j]){
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+// check if the game is over
+bool isAlive(){
+    if (emptyCell > 0){
+        return true;
+    }
+    return canOperate();
+}
+
+// check if the highest number reach 2048
+bool win(){
+    return highestNum == 2048;
+}
+
+// generate a new number between 2 & 4, with equal probability
+int newNum(){
+    return (rand() % 2 + 1) * 2;
+}
+
+// among all the empty cell
+// draw a random cell and fill the cell with a number
+void generateNewCell(){
+    // if there is no more empty cell, stop generating
+    if (emptyCell == 0){
+        return;
+    }
+    // generate a random number between 0..emptyCell
+    // loop through all empty cell
+    // fill the random number th empty cell
+    int randNum = rand() % emptyCell;
+    int i, j;
+    for (i=0; i<4; i++){
+        for (j=0; j<4; j++){
+            if (board[i][j] == 0){
+                if (randNum == 0){
+                    board[i][j] = newNum();
+                    emptyCell--;
+                    return;
+                }
+                randNum--;
+            }
+        }
+    }
+}
+
 // View part
 
 
@@ -23,7 +86,19 @@ int totalScore;
 // Control part
 
 int main(){
+    // 1. draw overall map/form
+
+    // 2. generate 2 random cell at beginning
     
+    // 3. show these 2 number in the form
+
+    // while (isAlive()){
+    //      4. wait for client's operation
+    //      UP, DOWN, LEFT, RIGHT using keyboard
+    //      5. Merge
+    //      6. generate new cell
+    // }
+
     return 0;
 }
 
