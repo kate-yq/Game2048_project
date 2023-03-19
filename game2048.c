@@ -82,14 +82,73 @@ void generateNewCell(){
 // View part
 
 
+void printDisplay() {
+ //top of the board
+    printf("+");
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            printf("-");
+        }
+        printf("+");
+    }
+    printf("\n");
+    
+    for (int i = 0; i < 4; i++) {
+        printf("|");
+        for (int j = 0; j < 4; j++) {
+            if (board[i][j] == 0) {
+                for (int k = 0; k < 4; k++) {
+                    printf(" ");
+                }
+            } else {
+                int numWidth = 0;
+                int n = board[i][j];
+                while (n > 0) {
+                    numWidth++;
+                    n /= 10;
+                }
+                for (int k = 0; k < (4 - numWidth) / 2; k++) {
+                    printf(" ");
+                }
+                printf("%d", board[i][j]);
+                for (int k = 0; k < (4 - numWidth + 1) / 2; k++) {
+                    printf(" ");
+                }
+            }
+            printf("|");
+        }
+        //bottom of the board
+        printf("\n+");
+        for (int j = 0; j < 4; j++) {
+            for (int k = 0; k < 4; k++) {
+                printf("-");
+            }
+            printf("+");
+        }
+        printf("\n");
+    }
+}
+
+void viewbar(){
+
+    printf("Total score:%d\n", totalScore);
+    printf("Highest number: %d\n",highestNum);
+
+}
 
 // Control part
 
 int main(){
-    // 1. draw overall map/form
 
+    // 1. draw overall map/form
     // 2. generate 2 random cell at beginning
+    //test example
+    totalScore = 3000;
+    highestNum = 256;
     
+    viewbar();
+    printDisplay();
+    //    
     // 3. show these 2 number in the form
 
     // while (isAlive()){
