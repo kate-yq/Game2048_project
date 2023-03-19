@@ -16,10 +16,73 @@ int totalScore;
 
 
 
+// check if there can be another operation
+// when the board is full
+bool canOperate(){
+    // check if there is a cell with same num on the right/down side
+    // of each cell
+    int i, j;
+    for (i=0; i<4; i++) {
+        for (j=0; j<4; j++) {
+            if (j<3 && board[i][j] == board[i][j+1]){
+                return true;
+            }
+            if (i<3 && board[i][j] == board[i+1][j]){
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+// check if the game is over
+bool isAlive(){
+    if (emptyCell > 0){
+        return true;
+    }
+    return canOperate();
+}
+
+// check if the highest number reach 2048
+bool win(){
+    return highestNum == 2048;
+}
+
+// generate a new number between 2 & 4, with equal probability
+int newNum(){
+    return (rand() % 2 + 1) * 2;
+}
+
+// among all the empty cell
+// draw a random cell and fill the cell with a number
+void generateNewCell(){
+    // if there is no more empty cell, stop generating
+    if (emptyCell == 0){
+        return;
+    }
+    // generate a random number between 0..emptyCell
+    // loop through all empty cell
+    // fill the random number th empty cell
+    int randNum = rand() % emptyCell;
+    int i, j;
+    for (i=0; i<4; i++){
+        for (j=0; j<4; j++){
+            if (board[i][j] == 0){
+                if (randNum == 0){
+                    board[i][j] = newNum();
+                    emptyCell--;
+                    return;
+                }
+                randNum--;
+            }
+        }
+    }
+}
+
 // View part
 
 
-void printDisplay(int arr[4][4]) {
+void printDisplay() {
  //top of the board
     printf("+");
     for (int i = 0; i < 4; i++) {
@@ -33,13 +96,13 @@ void printDisplay(int arr[4][4]) {
     for (int i = 0; i < 4; i++) {
         printf("|");
         for (int j = 0; j < 4; j++) {
-            if (arr[i][j] == 0) {
+            if (board[i][j] == 0) {
                 for (int k = 0; k < 4; k++) {
                     printf(" ");
                 }
             } else {
                 int numWidth = 0;
-                int n = arr[i][j];
+                int n = board[i][j];
                 while (n > 0) {
                     numWidth++;
                     n /= 10;
@@ -47,7 +110,7 @@ void printDisplay(int arr[4][4]) {
                 for (int k = 0; k < (4 - numWidth) / 2; k++) {
                     printf(" ");
                 }
-                printf("%d", arr[i][j]);
+                printf("%d", board[i][j]);
                 for (int k = 0; k < (4 - numWidth + 1) / 2; k++) {
                     printf(" ");
                 }
@@ -66,28 +129,35 @@ void printDisplay(int arr[4][4]) {
     }
 }
 
-void viewbar(int total_score,int largest_num){
+void viewbar(){
 
-    printf("Total score:%d\n",total_score);
-    printf("Highest number: %d\n",largest_num);
+    printf("Total score:%d\n", totalScore);
+    printf("Highest number: %d\n",highestNum);
 
 }
 
 // Control part
 
 int main(){
+
+    // 1. draw overall map/form
+    // 2. generate 2 random cell at beginning
     //test example
-     int total_score=3000;
-     int largest_num=256;
-     int arr[4][4] = {{2048, 256, 0, 0},
-                     {0, 0, 0, 0},
-                     {0, 1024, 0, 0},
-                     {0, 0, 0, 8}};
+    totalScore = 3000;
+    highestNum = 256;
     
-     viewbar(total_score, largest_num);
-     printDisplay(arr)
-    //
-    
+    viewbar();
+    printDisplay();
+    //    
+    // 3. show these 2 number in the form
+
+    // while (isAlive()){
+    //      4. wait for client's operation
+    //      UP, DOWN, LEFT, RIGHT using keyboard
+    //      5. Merge
+    //      6. generate new cell
+    // }
+
     return 0;
 }
 
