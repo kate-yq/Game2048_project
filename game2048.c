@@ -145,6 +145,7 @@ int main(){
     //test example
     totalScore = 3000;
     highestNum = 256;
+    int ch;
     
     viewbar();
     printDisplay();
@@ -157,8 +158,37 @@ int main(){
     //      5. Merge
     //      6. generate new cell
     // }
+    while (ch = getchar() != '#'){
+        system("clear");
+        viewbar(totalScore, highestNum);
 
-    return 0;
+        printDisplay(board);
+
+        if (ch==27) //ESC for exit the 'while'
+            break;
+        else if (ch=='w') {
+
+            printf("UP");
+
+        }
+        else if (ch=='s'){
+            printf("DOWN");
+
+        }
+
+        else if (ch=='a'){
+            printf("LEFT");
+
+        }
+
+        else if (ch=='d'){
+            printf("RIGHT");
+
+        }
+
+
+
+        return 0;
 }
 
 
