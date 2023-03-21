@@ -6,6 +6,7 @@
 #include <ncurses.h>
 
 // global variable
+int N = 4; 
 int board[4][4];
 int emptyCell;
 int highestNum;
@@ -13,7 +14,8 @@ int totalScore;
 
 // Model part
 
-
+void printDisplay();
+void test(); 
 
 
 // check if there can be another operation
@@ -78,6 +80,91 @@ void generateNewCell(){
         }
     }
 }
+
+
+// MOVE-FOUR-DIRECTIONS
+
+// this function rotates the board clockwise for 90 degrees
+// the parameter times indicates how many times we do this 90-degree rotation
+void rotate(int times) {
+    while (times-- > 0) {
+        for (int i = 0; i < N / 2; i++) {
+            for (int j = i; j < N - i - 1; j++) {
+                int temp = board[i][j]; 
+                board[i][j] = board[N - j - 1][i];
+                board[N - j - 1][i] = board[N - i - 1][N - j - 1]; 
+                board[N - i - 1][N - j - 1] = board[j][N - i - 1]; 
+                board[j][N - i - 1] = temp; 
+            }
+        }
+    }
+}
+
+// move tile board[rowb][col] to board[rowa][col], merge when possible
+void moveToLast(int col, int rowa, int rowb) {
+    if (rowa == rowb) return; 
+    board[rowa][col] += board[rowb][col]; 
+    board[rowb][col] = 0; 
+}
+
+void moveAndMerge() {
+    for (int col = 0; col < N; col++) {
+        int last = 0;   // last is the row index for last tile
+        bool foundFirst = false; 
+        bool canMerge = true; 
+        for (int row = 0; row < N; row++) {
+            // skip if current block is not occupied 
+            if (board[row][col] == 0) continue; 
+            // base case: if we found the first tile, 
+            // we move the tile to row 0
+            if (!foundFirst) {
+                foundFirst = true; 
+                moveToLast(col, last, row); 
+                continue; 
+            }
+            // general case: compare curr tile to last tile
+            // if they can be merged, merge them
+            // otherwise move curr tile to last tile's next tile
+            if (canMerge && board[last][col] == board[row][col]) {
+                moveToLast(col, last, row); 
+                canMerge = false;   // we can't merge to a tile that's already been merged 
+                totalScore += board[last][col]; 
+            } else {
+                moveToLast(col, ++last, row); 
+                canMerge = true; 
+            }
+        }
+    }
+}
+
+
+void moveUp() {
+    moveAndMerge(); 
+}
+
+void moveDown() {
+    rotate(2); 
+    moveAndMerge(); 
+    rotate(2); 
+}
+
+void moveLeft() {
+    rotate(1); 
+    moveAndMerge(); 
+    rotate(3); 
+
+}
+
+void moveRight() {
+    rotate(3); 
+    moveAndMerge(); 
+    rotate(1); 
+}
+
+
+
+
+
 
 // View part
 
@@ -145,10 +232,9 @@ int main(){
     //test example
     totalScore = 3000;
     highestNum = 256;
-    
-    viewbar();
-    printDisplay();
-    //    
+
+    // test(); 
+
     // 3. show these 2 number in the form
 
     // while (isAlive()){
@@ -159,6 +245,35 @@ int main(){
     // }
 
     return 0;
+}
+
+
+void test() {
+        int i = 0;
+    int j=0;
+    for (i=0; i<4; i++){
+        // if (i == 1) continue; 
+        for (j=0; j<2; j++){
+            board[i][j] = 2;
+        }
+        for (j = 2; j < 4; j++) {
+            board[i][j] = 4; 
+        }
+    }
+    viewbar();
+    printDisplay();
+
+    moveUp(); 
+    printDisplay();
+
+    moveLeft(); 
+    printDisplay(); 
+
+    moveRight(); 
+    printDisplay(); 
+
+    moveDown(); 
+    printDisplay(); 
 }
 
 
