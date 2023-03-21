@@ -102,41 +102,40 @@ void rotate(int times) {
 
 // move tile board[rowb][col] to board[rowa][col], merge when possible
 void moveToLast(int col, int rowa, int rowb) {
+    if (rowa == rowb) return; 
     board[rowa][col] += board[rowb][col]; 
     board[rowb][col] = 0; 
 }
 
 void moveAndMerge() {
     for (int col = 0; col < N; col++) {
-        int last = 0; 
-        int index = 0;  // the index for next tile to be moved 
+        int last = 0;   // last is the row index for last tile
+        bool foundFirst = false; 
+        bool canMerge = true; 
         for (int row = 0; row < N; row++) {
-            // skip if current tile is zero
+            // skip if current block is not occupied 
             if (board[row][col] == 0) continue; 
-            // merge if the the current tile can be merged to last tile 
-            if (board[row][col] == last) {
-                moveToLast(col, index++, row);  // the merged tile cannot be merged again, so we do index++
-                totalScore += board[index - 1][col]; 
-                last = 0; 
-            // otherwise move current tile up when possible 
+            // base case: if we found the first tile, 
+            // we move the tile to row 0
+            if (!foundFirst) {
+                foundFirst = true; 
+                moveToLast(col, last, row); 
+                continue; 
+            }
+            // general case: compare curr tile to last tile
+            // if they can be merged, merge them
+            // otherwise move curr tile to last tile's next tile
+            if (canMerge && board[last][col] == board[row][col]) {
+                moveToLast(col, last, row); 
+                canMerge = false;   // we can't merge to a tile that's already been merged 
+                totalScore += board[last][col]; 
             } else {
-                last = board[row][col]; 
-                if (index != row) {
-                    if (board[index][col] != 0) {
-                        // if the destination(board[index][col]) is already occupied 
-                        // by a tile, then we move to the destination's next tile
-                        moveToLast(col, ++index, row);  
-                    } else {
-                        // if the destination(board[index][col]) is not occupied, 
-                        // then we move to the destination 
-                        moveToLast(col, index, row);    
-                    }
-                } 
+                moveToLast(col, ++last, row); 
+                canMerge = true; 
             }
         }
     }
 }
-
 
 
 void moveUp() {
