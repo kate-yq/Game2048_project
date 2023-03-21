@@ -100,13 +100,7 @@ void rotate(int times) {
     }
 }
 
-// move tile [rowb][col] to [rowa][col] 
-void merge(int col, int rowa, int rowb) {
-    board[rowa][col] += board[rowb][col]; 
-    totalScore += board[rowa][col]; 
-    board[rowb][col] = 0; 
-}
-
+// move tile board[rowb][col] to board[rowa][col], merge when possible
 void moveToLast(int col, int rowa, int rowb) {
     board[rowa][col] += board[rowb][col]; 
     board[rowb][col] = 0; 
@@ -117,28 +111,28 @@ void moveAndMerge() {
         int last = 0; 
         int index = 0;  // the index for next tile to be moved 
         for (int row = 0; row < N; row++) {
+            // skip if current tile is zero
             if (board[row][col] == 0) continue; 
+            // merge if the the current tile can be merged to last tile 
             if (board[row][col] == last) {
-                merge(col, index++, row); 
+                moveToLast(col, index++, row);  // the merged tile cannot be merged again, so we do index++
+                totalScore += board[index - 1][col]; 
                 last = 0; 
-                // printDisplay();
+            // otherwise move current tile up when possible 
             } else {
                 last = board[row][col]; 
                 if (index != row) {
                     if (board[index][col] != 0) {
-                        moveToLast(col, ++index, row); 
+                        // if the destination(board[index][col]) is already occupied 
+                        // by a tile, then we move to the destination's next tile
+                        moveToLast(col, ++index, row);  
                     } else {
-                        moveToLast(col, index, row); 
+                        // if the destination(board[index][col]) is not occupied, 
+                        // then we move to the destination 
+                        moveToLast(col, index, row);    
                     }
-                    // printDisplay();
                 } 
-                // printDisplay();
             }
-            // if it is zero, continue;  
-            // if it is not zero
-                // check if it can be merged to last
-                    // if yes merge, set last to 0, index = 
-                    // if no, make it last and move it to index++
         }
     }
 }
