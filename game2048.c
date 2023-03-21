@@ -9,13 +9,44 @@
 int N = 4; 
 int board[4][4];
 int emptyCell;
-int highestNum;
-int totalScore;
+int highestNum = 0;
+int totalScore = 0;
+
+// function name
+// helper functions
+bool canOperate();
+bool isAlive();
+bool win();
+int newNum();
+void generateNewCell();
+// move function
+void rotate();
+void moveToLast();
+void moveAndMerge();
+void moveUp();
+void moveDown();
+void moveLeft();
+void moveRight();
+// print functions
+void printDisplay();
+void viewbar();
+void test(); 
+// comprehensive functions
+void slideUP();
+void slideDOWN();
+void slideLEFT();
+void slideRIGHT();
+
 
 // Model part
 
-void printDisplay();
-void test(); 
+// check if the game is over
+bool isAlive(){
+    if (emptyCell > 0){
+        return true;
+    }
+    return canOperate();
+}
 
 
 // check if there can be another operation
@@ -24,8 +55,8 @@ bool canOperate(){
     // check if there is a cell with same num on the right/down side
     // of each cell
     int i, j;
-    for (i=0; i<4; i++) {
-        for (j=0; j<4; j++) {
+    for (i=0; i<N; i++) {
+        for (j=0; j<N; j++) {
             if (j<3 && board[i][j] == board[i][j+1]){
                 return true;
             }
@@ -35,14 +66,6 @@ bool canOperate(){
         }
     }
     return false;
-}
-
-// check if the game is over
-bool isAlive(){
-    if (emptyCell > 0){
-        return true;
-    }
-    return canOperate();
 }
 
 // check if the highest number reach 2048
@@ -67,12 +90,13 @@ void generateNewCell(){
     // fill the random number th empty cell
     int randNum = rand() % emptyCell;
     int i, j;
-    for (i=0; i<4; i++){
-        for (j=0; j<4; j++){
+    for (i=0; i<N; i++){
+        for (j=0; j<N; j++){
             if (board[i][j] == 0){
                 if (randNum == 0){
                     board[i][j] = newNum();
                     emptyCell--;
+                    highestNum = board[i][j] > highestNum? board[i][j] : highestNum;
                     return;
                 }
                 randNum--;
@@ -104,6 +128,7 @@ void rotate(int times) {
 void moveToLast(int col, int rowa, int rowb) {
     if (rowa == rowb) return; 
     board[rowa][col] += board[rowb][col]; 
+    highestNum = board[rowa][col] > highestNum ? board[rowa][col] : highestNum;
     board[rowb][col] = 0; 
 }
 
@@ -160,8 +185,6 @@ void moveRight() {
     moveAndMerge(); 
     rotate(1); 
 }
-
-
 
 
 
@@ -223,29 +246,83 @@ void viewbar(){
 
 }
 
+
 // Control part
+
+
+void slideUP(){
+
+}
+
+
+void slideDOWN(){
+
+}
+
+
+void slideLEFT(){
+
+}
+
+
+void slideRIGHT(){
+
+}
+
+
 
 int main(){
 
-    // 1. draw overall map/form
-    // 2. generate 2 random cell at beginning
-    //test example
-    totalScore = 3000;
-    highestNum = 256;
+    // 1. generate 1 random cell at beginning
+    generateNewCell();
+    generateNewCell();
 
-    // test(); 
+    // 2. show the board
+    viewbar();
+    printDisplay();
 
-    // 3. show these 2 number in the form
+    while(isAlive() && !win()){
+        // 3. wait for client's operation
+        char op = getchar();
+        switch(op){
+            case 'w':
+                slideUP();
+                break;
+            case 's':
+                slideDOWN();
+                break;
+            case 'a':
+                slideLEFT();
+                break;
+            case 'd':
+                slideRIGHT();
+            default:
+                return 0;
+        }
 
-    // while (isAlive()){
-    //      4. wait for client's operation
-    //      UP, DOWN, LEFT, RIGHT using keyboard
-    //      5. Merge
-    //      6. generate new cell
-    // }
+        // 4. generate another cell if possible
+        generateNewCell();
+    }
+
+    if (win()){
+        viewbar();
+        printDisplay();
+        printf("YOU WON!");
+    }
+
+    if (!isAlive()){
+        viewbar();
+        printDisplay();
+        printf("YOU LOSE!");
+    }
 
     return 0;
 }
+
+
+
+
+
 
 
 void test() {
