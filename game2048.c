@@ -289,7 +289,7 @@ void slideUP(){
     moveUp();
     showInfo();
     printf("UP\n");
-    usleep(500000);
+    usleep(400000);
     generateNewCell();
     showInfo();
     printf("UP\n");
@@ -300,7 +300,7 @@ void slideDOWN(){
     moveDown();
     showInfo();
     printf("DOWN\n");
-    usleep(200000);
+    usleep(400000);
     generateNewCell();
     showInfo();
     printf("DOWN\n");
@@ -311,7 +311,7 @@ void slideLEFT(){
     moveLeft();
     showInfo();
     printf("LEFT\n");
-    usleep(700000);
+    usleep(400000);
     generateNewCell();
     showInfo();
     printf("LEFT\n");
@@ -322,7 +322,7 @@ void slideRIGHT(){
     moveRight();
     showInfo();
     printf("RIGHT\n");
-    usleep(1000000);
+    usleep(400000);
     generateNewCell();
     showInfo();
     printf("RIGHT\n");
@@ -370,7 +370,7 @@ int main() {
                     slideRIGHT();
                     break;
                 default:
-                    break;
+                    printf("Illeagal input! Please use wsad\n");
             }
         }
     }
