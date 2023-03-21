@@ -4,22 +4,23 @@
 #include <string.h>
 #include <time.h>
 #include <ncurses.h>
+#include <unistd.h>
 
 // global variable
-int N = 4; 
+int N = 4;
 int board[4][4];
-int emptyCell;
+int emptyCell;        //originally 16, initialized in main() 
 int highestNum = 0;
 int totalScore = 0;
 
-// function name
+// function name 
 // helper functions
 bool canOperate();
 bool isAlive();
 bool win();
 int newNum();
 void generateNewCell();
-// move function
+// move functions
 void rotate();
 void moveToLast();
 void moveAndMerge();
@@ -30,8 +31,9 @@ void moveRight();
 // print functions
 void printDisplay();
 void viewbar();
-void test(); 
+
 // comprehensive functions
+void showInfo();
 void slideUP();
 void slideDOWN();
 void slideLEFT();
@@ -40,18 +42,15 @@ void slideRIGHT();
 
 // Model part
 
-// check if the game is over
-bool isAlive(){
-    if (emptyCell > 0){
-        return true;
-    }
-    return canOperate();
-}
 
+// check if the game is over
+bool isAlive() {
+    return emptyCell>0 || canOperate();
+}
 
 // check if there can be another operation
 // when the board is full
-bool canOperate(){
+bool canOperate() {
     // check if there is a cell with same num on the right/down side
     // of each cell
     int i, j;
@@ -60,7 +59,7 @@ bool canOperate(){
             if (j<3 && board[i][j] == board[i][j+1]){
                 return true;
             }
-            if (i<3 && board[i][j] == board[i+1][j]){
+            if (i < 3 && board[i][j] == board[i + 1][j]) {
                 return true;
             }
         }
@@ -69,20 +68,28 @@ bool canOperate(){
 }
 
 // check if the highest number reach 2048
-bool win(){
+bool win() {
     return highestNum == 2048;
 }
 
-// generate a new number between 2 & 4, with equal probability
-int newNum(){
-    return (rand() % 2 + 1) * 2;
+// generate a new number between 2 & 4
+// probability: 2 - 75%, 4 - 25%
+int newNum() {
+    int p = rand() % 4;
+    if (p<3){
+        return 2;
+    } else {
+        return 4;
+    }
 }
 
 // among all the empty cell
 // draw a random cell and fill the cell with a number
-void generateNewCell(){
+void generateNewCell() {
     // if there is no more empty cell, stop generating
-    if (emptyCell == 0){
+    // but not fail the game because need to check if it can be slide
+    // form other directions
+    if (emptyCell == 0) {
         return;
     }
     // generate a random number between 0..emptyCell
@@ -126,15 +133,20 @@ void rotate(int times) {
 
 // move tile board[rowb][col] to board[rowa][col], merge when possible
 void moveToLast(int col, int rowa, int rowb) {
-    if (rowa == rowb) return; 
-    board[rowa][col] += board[rowb][col]; 
+    if (rowa == rowb) return;
+    if (board[rowa][col] != 0){
+        // means merge a new one into this one
+        emptyCell++;
+    }
+    board[rowa][col] += board[rowb][col];
     highestNum = board[rowa][col] > highestNum ? board[rowa][col] : highestNum;
-    board[rowb][col] = 0; 
+    board[rowb][col] = 0;
 }
 
 void moveAndMerge() {
     for (int col = 0; col < N; col++) {
         int last = 0;   // last is the row index for last tile
+
         bool foundFirst = false; 
         bool canMerge = true; 
         for (int row = 0; row < N; row++) {
@@ -145,7 +157,7 @@ void moveAndMerge() {
             if (!foundFirst) {
                 foundFirst = true; 
                 moveToLast(col, last, row); 
-                continue; 
+                continue;
             }
             // general case: compare curr tile to last tile
             // if they can be merged, merge them
@@ -156,7 +168,7 @@ void moveAndMerge() {
                 totalScore += board[last][col]; 
             } else {
                 moveToLast(col, ++last, row); 
-                canMerge = true; 
+                canMerge = true;
             }
         }
     }
@@ -164,64 +176,77 @@ void moveAndMerge() {
 
 
 void moveUp() {
-    moveAndMerge(); 
+    moveAndMerge();
 }
 
 void moveDown() {
-    rotate(2); 
-    moveAndMerge(); 
-    rotate(2); 
+    rotate(2);
+    moveAndMerge();
+    rotate(2);
 }
 
 void moveLeft() {
-    rotate(1); 
-    moveAndMerge(); 
-    rotate(3); 
-
+    rotate(1);
+    moveAndMerge();
+    rotate(3);
 }
 
 void moveRight() {
     rotate(3); 
     moveAndMerge(); 
-    rotate(1); 
+    rotate(1);
 }
-
-
 
 
 // View part
 
 
+// detect system and call corresponding terminal command
+void clearScreen() {
+#ifdef _WIN32
+    // Windows platform
+    system("cls");
+#elif __APPLE__
+    // macOS platform
+        system("clear");
+#else
+    // Other platforms (e.g., Linux)
+    system("clear");
+#endif
+}
+
+// printt the board
 void printDisplay() {
- //top of the board
+    //top of the board
     printf("+");
-    for (int i = 0; i < 4; i++) {
-        for (int j = 0; j < 4; j++) {
+    for (int i = 0; i < N; i++) {
+        for (int j = 0; j < N; j++) {
             printf("-");
         }
         printf("+");
     }
     printf("\n");
-    
-    for (int i = 0; i < 4; i++) {
+
+    for (int i = 0; i < N; i++) {
         printf("|");
-        for (int j = 0; j < 4; j++) {
+        for (int j = 0; j < N; j++) {
             if (board[i][j] == 0) {
                 for (int k = 0; k < 4; k++) {
                     printf(" ");
                 }
-            } else {
+            }
+            else {
                 int numWidth = 0;
                 int n = board[i][j];
                 while (n > 0) {
                     numWidth++;
                     n /= 10;
                 }
-                for (int k = 0; k < (4 - numWidth) / 2; k++) {
+                for (int k = 0; k < (N - numWidth) / 2; k++) {
                     printf(" ");
                 }
                 printf("%d", board[i][j]);
-                for (int k = 0; k < (4 - numWidth + 1) / 2; k++) {
+                for (int k = 0; k < (N - numWidth + 1) / 2; k++) {
                     printf(" ");
                 }
             }
@@ -229,8 +254,8 @@ void printDisplay() {
         }
         //bottom of the board
         printf("\n+");
-        for (int j = 0; j < 4; j++) {
-            for (int k = 0; k < 4; k++) {
+        for (int j = 0; j < N; j++) {
+            for (int k = 0; k < N; k++) {
                 printf("-");
             }
             printf("+");
@@ -239,75 +264,121 @@ void printDisplay() {
     }
 }
 
-void viewbar(){
-
+// print the score information
+void viewbar() {
     printf("Total score:%d\n", totalScore);
-    printf("Highest number: %d\n",highestNum);
-
+    printf("Highest number: %d\n", highestNum);
 }
+
 
 
 // Control part
 
+// clear the page and then print the viewbar and board
+void showInfo(){
+    clearScreen();
+    viewbar();
+    printf("\n");
+    printDisplay();
+}
 
+// for major function and outprint for 4 direction slide
+// show the merge result first
+// wait for a while then generate the new cube
 void slideUP(){
-
+    moveUp();
+    showInfo();
+    printf("UP\n");
+    usleep(500000);
+    generateNewCell();
+    showInfo();
+    printf("UP\n");
 }
 
 
 void slideDOWN(){
-
+    moveDown();
+    showInfo();
+    printf("DOWN\n");
+    usleep(200000);
+    generateNewCell();
+    showInfo();
+    printf("DOWN\n");
 }
 
 
 void slideLEFT(){
-
+    moveLeft();
+    showInfo();
+    printf("LEFT\n");
+    usleep(700000);
+    generateNewCell();
+    showInfo();
+    printf("LEFT\n");
 }
 
 
 void slideRIGHT(){
-
+    moveRight();
+    showInfo();
+    printf("RIGHT\n");
+    usleep(1000000);
+    generateNewCell();
+    showInfo();
+    printf("RIGHT\n");
 }
 
 
+int main() {
 
-int main(){
+    //1. print starting message
+    printf("Welcome to the 2048 game!\n\n");
+    printf("Here are the instructions:\n\n");
+    printf("Press # to start the game or ESC to quit\n");
+    printf("Press w to slide UP\n");
+    printf("Press s to slide DOWN\n");
+    printf("Press a to slide LEFT\n");
+    printf("Press d to slide RIGHT\n");
 
-    // 1. generate 1 random cell at beginning
-    generateNewCell();
-    generateNewCell();
-
-    // 2. show the board
-    viewbar();
-    printDisplay();
-
-    while(isAlive() && !win()){
-        // 3. wait for client's operation
-        char op = getchar();
-        switch(op){
-            case 'w':
-                slideUP();
-                break;
-            case 's':
-                slideDOWN();
-                break;
-            case 'a':
-                slideLEFT();
-                break;
-            case 'd':
-                slideRIGHT();
-            default:
-                return 0;
+    while (isAlive() && !win()) {
+        //receiving [wasd]
+        int ch1, ch2;
+        ch1 = getchar();
+        if (ch1 == 27)
+            break;
+        else {
+            ch2 = getchar();  //receiving "\n"
+            // switch case
+            switch (ch1) {
+                case '#':  
+                    //start the game
+                    emptyCell = 16;
+                    generateNewCell();
+                    generateNewCell();
+                    showInfo();
+                    break;
+                case  'w':
+                    slideUP();
+                    break;
+                case 's':
+                    slideDOWN();
+                    break;
+                case 'a':
+                    slideLEFT();
+                    break;
+                case 'd':
+                    slideRIGHT();
+                    break;
+                default:
+                    break;
+            }
         }
-
-        // 4. generate another cell if possible
-        generateNewCell();
     }
 
     if (win()){
         viewbar();
         printDisplay();
-        printf("YOU WON!");
+        printf("YOU WIN!");
     }
 
     if (!isAlive()){
@@ -315,42 +386,5 @@ int main(){
         printDisplay();
         printf("YOU LOSE!");
     }
-
     return 0;
 }
-
-
-
-
-
-
-
-void test() {
-        int i = 0;
-    int j=0;
-    for (i=0; i<4; i++){
-        // if (i == 1) continue; 
-        for (j=0; j<2; j++){
-            board[i][j] = 2;
-        }
-        for (j = 2; j < 4; j++) {
-            board[i][j] = 4; 
-        }
-    }
-    viewbar();
-    printDisplay();
-
-    moveUp(); 
-    printDisplay();
-
-    moveLeft(); 
-    printDisplay(); 
-
-    moveRight(); 
-    printDisplay(); 
-
-    moveDown(); 
-    printDisplay(); 
-}
-
-
