@@ -6,6 +6,7 @@
 #include <ncurses.h>
 
 // global variable
+int N = 4; 
 int board[4][4];
 int emptyCell;
 int highestNum;
@@ -13,7 +14,8 @@ int totalScore;
 
 // Model part
 
-
+void printDisplay();
+void test(); 
 
 
 // check if there can be another operation
@@ -78,6 +80,98 @@ void generateNewCell(){
         }
     }
 }
+
+
+// MOVE-FOUR-DIRECTIONS
+
+// this function rotates the board clockwise for 90 degrees
+// the parameter times indicates how many times we do this 90-degree rotation
+void rotate(int times) {
+    while (times-- > 0) {
+        for (int i = 0; i < N / 2; i++) {
+            for (int j = i; j < N - i - 1; j++) {
+                int temp = board[i][j]; 
+                board[i][j] = board[N - j - 1][i];
+                board[N - j - 1][i] = board[N - i - 1][N - j - 1]; 
+                board[N - i - 1][N - j - 1] = board[j][N - i - 1]; 
+                board[j][N - i - 1] = temp; 
+            }
+        }
+    }
+}
+
+// move tile [rowb][col] to [rowa][col] 
+void merge(int col, int rowa, int rowb) {
+    board[rowa][col] += board[rowb][col]; 
+    totalScore += board[rowa][col]; 
+    board[rowb][col] = 0; 
+}
+
+void moveToLast(int col, int rowa, int rowb) {
+    board[rowa][col] += board[rowb][col]; 
+    board[rowb][col] = 0; 
+}
+
+void moveAndMerge() {
+    for (int col = 0; col < N; col++) {
+        int last = 0; 
+        int index = 0;  // the index for next tile to be moved 
+        for (int row = 0; row < N; row++) {
+            if (board[row][col] == 0) continue; 
+            if (board[row][col] == last) {
+                merge(col, index++, row); 
+                last = 0; 
+                // printDisplay();
+            } else {
+                last = board[row][col]; 
+                if (index != row) {
+                    if (board[index][col] != 0) {
+                        moveToLast(col, ++index, row); 
+                    } else {
+                        moveToLast(col, index, row); 
+                    }
+                    // printDisplay();
+                } 
+                // printDisplay();
+            }
+            // if it is zero, continue;  
+            // if it is not zero
+                // check if it can be merged to last
+                    // if yes merge, set last to 0, index = 
+                    // if no, make it last and move it to index++
+        }
+    }
+}
+
+
+
+void moveUp() {
+    moveAndMerge(); 
+}
+
+void moveDown() {
+    rotate(2); 
+    moveAndMerge(); 
+    rotate(2); 
+}
+
+void moveLeft() {
+    rotate(1); 
+    moveAndMerge(); 
+    rotate(3); 
+
+}
+
+void moveRight() {
+    rotate(3); 
+    moveAndMerge(); 
+    rotate(1); 
+}
+
+
+
+
+
 
 // View part
 
@@ -145,10 +239,9 @@ int main(){
     //test example
     totalScore = 3000;
     highestNum = 256;
-    
-    viewbar();
-    printDisplay();
-    //    
+
+    // test(); 
+
     // 3. show these 2 number in the form
 
     // while (isAlive()){
@@ -159,6 +252,35 @@ int main(){
     // }
 
     return 0;
+}
+
+
+void test() {
+        int i = 0;
+    int j=0;
+    for (i=0; i<4; i++){
+        // if (i == 1) continue; 
+        for (j=0; j<2; j++){
+            board[i][j] = 2;
+        }
+        for (j = 2; j < 4; j++) {
+            board[i][j] = 4; 
+        }
+    }
+    viewbar();
+    printDisplay();
+
+    moveUp(); 
+    printDisplay();
+
+    moveLeft(); 
+    printDisplay(); 
+
+    moveRight(); 
+    printDisplay(); 
+
+    moveDown(); 
+    printDisplay(); 
 }
 
 
