@@ -9,20 +9,26 @@
 // global variable
 int N = 4;
 int board[4][4];
-int emptyCell;        //originally 16, initialized in main() 
+int emptyCell = 16;
 int highestNum = 0;
 int totalScore = 0;
+int sleepTime = 400000;
+bool started = false;
 
 // function name 
 // helper functions
 bool canOperate();
+bool canOperateUp();
+bool canOperateDown();
+bool canOperateLeft();
+bool canOperateRight();
 bool isAlive();
 bool win();
 int newNum();
 void generateNewCell();
 // move functions
-void rotate();
-void moveToLast();
+void rotate(int times);
+void moveToLast(int col, int rowa, int rowb);
 void moveAndMerge();
 void moveUp();
 void moveDown();
@@ -51,21 +57,66 @@ bool isAlive() {
 // check if there can be another operation
 // when the board is full
 bool canOperate() {
-    // check if there is a cell with same num on the right/down side
-    // of each cell
+    return canOperateUp() || canOperateDown() 
+        || canOperateLeft() || canOperateRight();
+}
+
+// check if the board will be different if move up
+bool canOperateUp() {
     int i, j;
-    for (i=0; i<N; i++) {
+    for (i=1; i<N; i++) {
         for (j=0; j<N; j++) {
-            if (j<3 && board[i][j] == board[i][j+1]){
-                return true;
-            }
-            if (i < 3 && board[i][j] == board[i + 1][j]) {
+            if (board[i][j] > 0 && 
+            (board[i-1][j] == board[i][j] || board[i-1][j] == 0)){
                 return true;
             }
         }
     }
     return false;
 }
+
+// check if the board will be different if move down
+bool canOperateDown() {
+    int i, j;
+    for (i=0; i<N-1; i++) {
+        for (j=0; j<N; j++) {
+            if (board[i][j] > 0 && 
+            (board[i+1][j] == board[i][j] || board[i+1][j] == 0)){
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+// check if the board will be different if move left
+bool canOperateLeft() {
+    int i, j;
+    for (i=0; i<N; i++) {
+        for (j=1; j<N; j++) {
+            if (board[i][j] > 0 && 
+            (board[i][j-1] == board[i][j] || board[i][j-1] == 0)){
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+// check if the board will be different if move right
+bool canOperateRight() {
+    int i, j;
+    for (i=1; i<N; i++) {
+        for (j=0; j<N-1; j++) {
+            if (board[i][j] > 0 && 
+            (board[i][j+1] == board[i][j] || board[i][j+1] == 0)){
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 
 // check if the highest number reach 2048
 bool win() {
@@ -286,10 +337,13 @@ void showInfo(){
 // show the merge result first
 // wait for a while then generate the new cube
 void slideUP(){
+    if (!canOperateUp()){
+        return;
+    }
     moveUp();
     showInfo();
     printf("UP\n");
-    usleep(400000);
+    usleep(sleepTime);
     generateNewCell();
     showInfo();
     printf("UP\n");
@@ -297,10 +351,13 @@ void slideUP(){
 
 
 void slideDOWN(){
+    if (!canOperateDown()){
+        return;
+    }
     moveDown();
     showInfo();
     printf("DOWN\n");
-    usleep(400000);
+    usleep(sleepTime);
     generateNewCell();
     showInfo();
     printf("DOWN\n");
@@ -308,10 +365,13 @@ void slideDOWN(){
 
 
 void slideLEFT(){
+    if (!canOperateLeft()){
+        return;
+    }
     moveLeft();
     showInfo();
     printf("LEFT\n");
-    usleep(400000);
+    usleep(sleepTime);
     generateNewCell();
     showInfo();
     printf("LEFT\n");
@@ -319,10 +379,13 @@ void slideLEFT(){
 
 
 void slideRIGHT(){
+    if (!canOperateRight()){
+        return;
+    }
     moveRight();
     showInfo();
     printf("RIGHT\n");
-    usleep(400000);
+    usleep(sleepTime);
     generateNewCell();
     showInfo();
     printf("RIGHT\n");
@@ -352,11 +415,15 @@ int main() {
             switch (ch1) {
                 case '#':  
                     //start the game
-                    emptyCell = 16;
-                    generateNewCell();
-                    generateNewCell();
-                    showInfo();
-                    break;
+                    if (!started){
+                        started = true;
+                        generateNewCell();
+                        generateNewCell();
+                        showInfo();
+                        break;
+                    } else {
+                        printf("The game already started\n");
+                    }
                 case  'w':
                     slideUP();
                     break;
@@ -376,15 +443,11 @@ int main() {
     }
 
     if (win()){
-        viewbar();
-        printDisplay();
-        printf("YOU WIN!");
+        printf("YOU WIN!\n");
     }
 
     if (!isAlive()){
-        viewbar();
-        printDisplay();
-        printf("YOU LOSE!");
+        printf("YOU LOSE!\n");
     }
     return 0;
 }
