@@ -13,6 +13,7 @@ int emptyCell = 16;
 int highestNum = 0;
 int totalScore = 0;
 int sleepTime = 400000;
+bool started = false;
 
 // function name 
 // helper functions
@@ -414,10 +415,15 @@ int main() {
             switch (ch1) {
                 case '#':  
                     //start the game
-                    generateNewCell();
-                    generateNewCell();
-                    showInfo();
-                    break;
+                    if (!started){
+                        started = true;
+                        generateNewCell();
+                        generateNewCell();
+                        showInfo();
+                        break;
+                    } else {
+                        printf("The game already started\n");
+                    }
                 case  'w':
                     slideUP();
                     break;
@@ -437,15 +443,11 @@ int main() {
     }
 
     if (win()){
-        viewbar();
-        printDisplay();
-        printf("YOU WIN!");
+        printf("YOU WIN!\n");
     }
 
     if (!isAlive()){
-        viewbar();
-        printDisplay();
-        printf("YOU LOSE!");
+        printf("YOU LOSE!\n");
     }
     return 0;
 }
