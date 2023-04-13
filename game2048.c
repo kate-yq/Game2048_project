@@ -117,7 +117,6 @@ bool canOperateRight() {
     return false;
 }
 
-
 // check if the highest number reach 2048
 bool win() {
     return highestNum == 2048;
@@ -172,11 +171,11 @@ void rotate(int times) {
     while (times-- > 0) {
         for (int i = 0; i < N / 2; i++) {
             for (int j = i; j < N - i - 1; j++) {
-                int temp = board[i][j]; 
+                int temp = board[i][j];
                 board[i][j] = board[N - j - 1][i];
-                board[N - j - 1][i] = board[N - i - 1][N - j - 1]; 
-                board[N - i - 1][N - j - 1] = board[j][N - i - 1]; 
-                board[j][N - i - 1] = temp; 
+                board[N - j - 1][i] = board[N - i - 1][N - j - 1];
+                board[N - i - 1][N - j - 1] = board[j][N - i - 1];
+                board[j][N - i - 1] = temp;
             }
         }
     }
@@ -198,27 +197,27 @@ void moveAndMerge() {
     for (int col = 0; col < N; col++) {
         int last = 0;   // last is the row index for last tile
 
-        bool foundFirst = false; 
-        bool canMerge = true; 
+        bool foundFirst = false;
+        bool canMerge = true;
         for (int row = 0; row < N; row++) {
-            // skip if current block is not occupied 
-            if (board[row][col] == 0) continue; 
-            // base case: if we found the first tile, 
+            // skip if current block is not occupied
+            if (board[row][col] == 0) continue;
+            // base case: if we found the first tile,
             // we move the tile to row 0
             if (!foundFirst) {
-                foundFirst = true; 
-                moveToLast(col, last, row); 
+                foundFirst = true;
+                moveToLast(col, last, row);
                 continue;
             }
             // general case: compare curr tile to last tile
             // if they can be merged, merge them
             // otherwise move curr tile to last tile's next tile
             if (canMerge && board[last][col] == board[row][col]) {
-                moveToLast(col, last, row); 
-                canMerge = false;   // we can't merge to a tile that's already been merged 
-                totalScore += board[last][col]; 
+                moveToLast(col, last, row);
+                canMerge = false;   // we can't merge to a tile that's already been merged
+                totalScore += board[last][col];
             } else {
-                moveToLast(col, ++last, row); 
+                moveToLast(col, ++last, row);
                 canMerge = true;
             }
         }
@@ -243,13 +242,87 @@ void moveLeft() {
 }
 
 void moveRight() {
-    rotate(3); 
-    moveAndMerge(); 
+    rotate(3);
+    moveAndMerge();
     rotate(1);
 }
 
 
 // View part
+
+//save game state and resume the game
+typedef struct game_state{
+    int board[4][4];
+    int highestNum;
+    int totalScore;
+    int emptyCell;
+}Game_states;
+
+// save the game states to a file
+
+//write file
+void save_game_in_file(const Game_states* game){
+    FILE * file=fopen("game_state.txt","w");
+    if(file==NULL){
+        printf("Error:Unable to save the game state\n");
+        return;
+    }
+   size_t items_written= fwrite(game,sizeof(Game_states),1,file);
+    if (items_written != 1) {
+        perror("Error: fwrite failed");
+    }
+    fclose(file);
+}
+
+//load game
+//if can find and read the file return true, otherwise return false
+bool load_game(Game_states* game){
+    FILE * file=fopen("game_state.txt","r");
+    if(file==NULL){
+        printf("Error:Unable to load the game state\n");
+        return false;
+    }
+    size_t items_read=fread(game,sizeof(Game_states),1,file);
+    fclose(file);
+
+    if(items_read!=1){
+        printf("Error:Incorrect number of items read from the game.\n");
+        return false;
+    }
+
+    return true;
+}
+
+//
+void save_game(){
+    printf("Saving game...\n");
+    Game_states* game=malloc(sizeof(Game_states));
+    memcpy(game->board,board,sizeof(board));
+    game->highestNum=highestNum;
+    game->totalScore=totalScore;
+    game->emptyCell=emptyCell;
+    save_game_in_file(game);
+    printf("Game saved!\n");
+    free(game);
+}
+
+//resume game
+void resume_game(){
+    Game_states* game=malloc(sizeof(Game_states));
+    printf("Loading game..\n");
+    if(load_game(game)){
+        memcpy(board,game->board,sizeof(board));
+        highestNum=game->highestNum;
+        totalScore=game->totalScore;
+        emptyCell=game->emptyCell;
+        showInfo();
+        printf("Game loaded!\n");
+
+    }else{
+        printf("Failed to load game.\n");
+    }
+    free(game);
+}
 
 
 // detect system and call corresponding terminal command
@@ -402,14 +475,15 @@ int main() {
     printf("Press s to slide DOWN\n");
     printf("Press a to slide LEFT\n");
     printf("Press d to slide RIGHT\n");
+    printf("Press l to Resume game\n");
 
     while (isAlive() && !win()) {
         //receiving [wasd]
         int ch1, ch2;
         ch1 = getchar();
-        if (ch1 == 27)
+        if (ch1 == 27) {
             break;
-        else {
+        } else {
             ch2 = getchar();  //receiving "\n"
             // switch case
             switch (ch1) {
@@ -420,10 +494,10 @@ int main() {
                         generateNewCell();
                         generateNewCell();
                         showInfo();
-                        break;
                     } else {
                         printf("The game already started\n");
                     }
+                    break;
                 case  'w':
                     slideUP();
                     break;
@@ -436,6 +510,14 @@ int main() {
                 case 'd':
                     slideRIGHT();
                     break;
+                case 'l':
+                    if (!started){
+                        started = true;
+                        resume_game();
+                    } else {
+                        printf("The game already started, cannot resume\n");
+                    }
+                    break;
                 default:
                     printf("Illeagal input! Please use wsad\n");
             }
@@ -444,10 +526,16 @@ int main() {
 
     if (win()){
         printf("YOU WIN!\n");
-    }
-
-    if (!isAlive()){
+    } else if (!isAlive()){
         printf("YOU LOSE!\n");
+    } else {
+        printf("Do you want to save the current status? (Y/N)\n");
+        char ans;
+        scanf("%s",&ans);
+
+        if(ans=='Y' || ans=='y'){
+            save_game();
+        }
     }
     return 0;
 }
