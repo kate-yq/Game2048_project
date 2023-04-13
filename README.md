@@ -3,9 +3,11 @@
 
 ## How to run:
     Pull the whole repo to your local directory.
-    Make sure there is a .txt file named **_game_state.txt_**
-    $ gcc game2048.c
-    $ ./a.out
+    Make sure there is a .txt file named game_state.txt
+    
+    >  gcc game2048.c
+    >  ./a.out
+
 
 ## How to play:
     1. press # to start the game
