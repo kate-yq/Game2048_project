@@ -15,6 +15,14 @@ int totalScore = 0;
 int sleepTime = 400000;
 bool started = false;
 
+//struct to for game state to save and resume
+typedef struct game_state{
+    int board[4][4];
+    int highestNum;
+    int totalScore;
+    int emptyCell;
+}Game_states;
+
 // function name 
 // helper functions
 bool canOperate();
@@ -34,20 +42,27 @@ void moveUp();
 void moveDown();
 void moveLeft();
 void moveRight();
+// resume functions
+void save_game_in_file(const Game_states* game);
+bool load_game(Game_states* game);
 // print functions
 void printDisplay();
 void viewbar();
 
-// comprehensive functions
+// comprehensive control functions
 void showInfo();
+
+void startGame();
 void slideUP();
 void slideDOWN();
 void slideLEFT();
 void slideRIGHT();
 
+void save_game();
+void resume_game();
+
 
 // Model part
-
 
 // check if the game is over
 bool isAlive() {
@@ -248,18 +263,9 @@ void moveRight() {
 }
 
 
-// View part
-
-//save game state and resume the game
-typedef struct game_state{
-    int board[4][4];
-    int highestNum;
-    int totalScore;
-    int emptyCell;
-}Game_states;
+// resume implementation
 
 // save the game states to a file
-
 //write file
 void save_game_in_file(const Game_states* game){
     FILE * file=fopen("game_state.txt","w");
@@ -267,7 +273,7 @@ void save_game_in_file(const Game_states* game){
         printf("Error:Unable to save the game state\n");
         return;
     }
-   size_t items_written= fwrite(game,sizeof(Game_states),1,file);
+    size_t items_written= fwrite(game,sizeof(Game_states),1,file);
     if (items_written != 1) {
         perror("Error: fwrite failed");
     }
@@ -279,51 +285,22 @@ void save_game_in_file(const Game_states* game){
 bool load_game(Game_states* game){
     FILE * file=fopen("game_state.txt","r");
     if(file==NULL){
-        printf("Error:Unable to load the game state\n");
+        printf("Error: No game state to load.\n");
         return false;
     }
     size_t items_read=fread(game,sizeof(Game_states),1,file);
     fclose(file);
 
     if(items_read!=1){
-        printf("Error:Incorrect number of items read from the game.\n");
+        printf("Error: Incorrect number of items read from the game.\n");
         return false;
     }
 
     return true;
 }
 
-//
-void save_game(){
-    printf("Saving game...\n");
-    Game_states* game=malloc(sizeof(Game_states));
-    memcpy(game->board,board,sizeof(board));
-    game->highestNum=highestNum;
-    game->totalScore=totalScore;
-    game->emptyCell=emptyCell;
-    save_game_in_file(game);
-    printf("Game saved!\n");
-    free(game);
-}
 
-//resume game
-void resume_game(){
-    Game_states* game=malloc(sizeof(Game_states));
-    printf("Loading game..\n");
-    if(load_game(game)){
-        memcpy(board,game->board,sizeof(board));
-        highestNum=game->highestNum;
-        totalScore=game->totalScore;
-        emptyCell=game->emptyCell;
-        showInfo();
-        printf("Game loaded!\n");
-
-    }else{
-        printf("Failed to load game.\n");
-    }
-    free(game);
-}
-
+// view part
 
 // detect system and call corresponding terminal command
 void clearScreen() {
@@ -339,7 +316,7 @@ void clearScreen() {
 #endif
 }
 
-// printt the board
+// print the board
 void printDisplay() {
     //top of the board
     printf("+");
@@ -406,7 +383,15 @@ void showInfo(){
     printDisplay();
 }
 
-// for major function and outprint for 4 direction slide
+// start game
+void startGame(){
+    generateNewCell();
+    generateNewCell();
+    showInfo();
+    started = true;
+}
+
+// four major function and outprint for 4 direction slide
 // show the merge result first
 // wait for a while then generate the new cube
 void slideUP(){
@@ -464,6 +449,38 @@ void slideRIGHT(){
     printf("RIGHT\n");
 }
 
+// same game
+void save_game(){
+    printf("Saving game...\n");
+    Game_states* game=malloc(sizeof(Game_states));
+    memcpy(game->board,board,sizeof(board));
+    game->highestNum=highestNum;
+    game->totalScore=totalScore;
+    game->emptyCell=emptyCell;
+    save_game_in_file(game);
+    usleep(sleepTime);
+    printf("Game saved!\n");
+    free(game);
+}
+
+//resume game
+void resume_game(){
+    Game_states* game=malloc(sizeof(Game_states));
+    printf("Loading game..\n");
+    if(load_game(game)){
+        memcpy(board,game->board,sizeof(board));
+        highestNum=game->highestNum;
+        totalScore=game->totalScore;
+        emptyCell=game->emptyCell;
+        showInfo();
+        printf("Game loaded!\n");
+        started = true;
+    }
+
+    free(game);
+}
+
+
 
 int main() {
 
@@ -475,7 +492,7 @@ int main() {
     printf("Press s to slide DOWN\n");
     printf("Press a to slide LEFT\n");
     printf("Press d to slide RIGHT\n");
-    printf("Press l to Resume game\n");
+    printf("Press r to Resume game\n");
 
     while (isAlive() && !win()) {
         //receiving [wasd]
@@ -488,14 +505,10 @@ int main() {
             // switch case
             switch (ch1) {
                 case '#':  
-                    //start the game
                     if (!started){
-                        started = true;
-                        generateNewCell();
-                        generateNewCell();
-                        showInfo();
+                        startGame();
                     } else {
-                        printf("The game already started\n");
+                        printf("The game already started.\n");
                     }
                     break;
                 case  'w':
@@ -510,16 +523,15 @@ int main() {
                 case 'd':
                     slideRIGHT();
                     break;
-                case 'l':
+                case 'r':
                     if (!started){
-                        started = true;
                         resume_game();
                     } else {
-                        printf("The game already started, cannot resume\n");
+                        printf("The game already started, cannot resume.\n");
                     }
                     break;
                 default:
-                    printf("Illeagal input! Please use wsad\n");
+                    printf("Illeagal input! Please use wsad.\n");
             }
         }
     }
@@ -537,5 +549,6 @@ int main() {
             save_game();
         }
     }
+
     return 0;
 }
