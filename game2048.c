@@ -3,7 +3,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include <time.h>
-//#include <ncurses.h>
+#include <ncurses.h>
 #include <unistd.h>
 
 // global variable
@@ -15,7 +15,7 @@ int totalScore = 0;
 int sleepTime = 400000;
 bool started = false;
 
-// function name
+// function name 
 // helper functions
 bool canOperate();
 bool canOperateUp();
@@ -57,8 +57,8 @@ bool isAlive() {
 // check if there can be another operation
 // when the board is full
 bool canOperate() {
-    return canOperateUp() || canOperateDown()
-           || canOperateLeft() || canOperateRight();
+    return canOperateUp() || canOperateDown() 
+        || canOperateLeft() || canOperateRight();
 }
 
 // check if the board will be different if move up
@@ -66,8 +66,8 @@ bool canOperateUp() {
     int i, j;
     for (i=1; i<N; i++) {
         for (j=0; j<N; j++) {
-            if (board[i][j] > 0 &&
-                (board[i-1][j] == board[i][j] || board[i-1][j] == 0)){
+            if (board[i][j] > 0 && 
+            (board[i-1][j] == board[i][j] || board[i-1][j] == 0)){
                 return true;
             }
         }
@@ -80,8 +80,8 @@ bool canOperateDown() {
     int i, j;
     for (i=0; i<N-1; i++) {
         for (j=0; j<N; j++) {
-            if (board[i][j] > 0 &&
-                (board[i+1][j] == board[i][j] || board[i+1][j] == 0)){
+            if (board[i][j] > 0 && 
+            (board[i+1][j] == board[i][j] || board[i+1][j] == 0)){
                 return true;
             }
         }
@@ -94,8 +94,8 @@ bool canOperateLeft() {
     int i, j;
     for (i=0; i<N; i++) {
         for (j=1; j<N; j++) {
-            if (board[i][j] > 0 &&
-                (board[i][j-1] == board[i][j] || board[i][j-1] == 0)){
+            if (board[i][j] > 0 && 
+            (board[i][j-1] == board[i][j] || board[i][j-1] == 0)){
                 return true;
             }
         }
@@ -108,15 +108,14 @@ bool canOperateRight() {
     int i, j;
     for (i=1; i<N; i++) {
         for (j=0; j<N-1; j++) {
-            if (board[i][j] > 0 &&
-                (board[i][j+1] == board[i][j] || board[i][j+1] == 0)){
+            if (board[i][j] > 0 && 
+            (board[i][j+1] == board[i][j] || board[i][j+1] == 0)){
                 return true;
             }
         }
     }
     return false;
 }
-
 
 // check if the highest number reach 2048
 bool win() {
@@ -488,7 +487,7 @@ int main() {
             ch2 = getchar();  //receiving "\n"
             // switch case
             switch (ch1) {
-                case '#':
+                case '#':  
                     //start the game
                     if (!started){
                         started = true;
@@ -537,8 +536,6 @@ int main() {
         if(ans=='Y' || ans=='y'){
             save_game();
         }
-
-
     }
     return 0;
 }
