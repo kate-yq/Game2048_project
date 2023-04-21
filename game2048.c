@@ -268,7 +268,7 @@ void moveRight() {
 // save the game states to a file
 //write file
 void save_game_in_file(const Game_states* game){
-    FILE * file=fopen("game_state.txt","w");
+    FILE * file=fopen("game_state.bin","wb");
     if(file==NULL){
         printf("Error:Unable to save the game state\n");
         return;
@@ -283,7 +283,7 @@ void save_game_in_file(const Game_states* game){
 //load game
 //if can find and read the file return true, otherwise return false
 bool load_game(Game_states* game){
-    FILE * file=fopen("game_state.txt","r");
+    FILE * file=fopen("game_state.bin","rb");
     if(file==NULL){
         printf("Error: No game state to load.\n");
         return false;
@@ -396,7 +396,7 @@ void startGame(){
 // wait for a while then generate the new cube
 void slideUP(){
     if (!canOperateUp()){
-        printf("can't move up!"); 
+        printf("can't move up!\n"); 
         return;
     }
     moveUp();
@@ -411,7 +411,7 @@ void slideUP(){
 
 void slideDOWN(){
     if (!canOperateDown()){
-        printf("can't move down!"); 
+        printf("can't move down!\n"); 
         return;
     }
     moveDown();
@@ -426,7 +426,7 @@ void slideDOWN(){
 
 void slideLEFT(){
     if (!canOperateLeft()){
-        printf("can't move to left!"); 
+        printf("can't move to left!\n"); 
         return;
     }
     moveLeft();
@@ -441,7 +441,7 @@ void slideLEFT(){
 
 void slideRIGHT(){
     if (!canOperateRight()){
-        printf("can't move to right!"); 
+        printf("can't move to right!\n"); 
         return;
     }
     moveRight();
