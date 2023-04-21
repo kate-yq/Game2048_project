@@ -121,7 +121,7 @@ bool canOperateLeft() {
 // check if the board will be different if move right
 bool canOperateRight() {
     int i, j;
-    for (i=1; i<N; i++) {
+    for (i=0; i<N; i++) {
         for (j=0; j<N-1; j++) {
             if (board[i][j] > 0 && 
             (board[i][j+1] == board[i][j] || board[i][j+1] == 0)){
@@ -396,6 +396,7 @@ void startGame(){
 // wait for a while then generate the new cube
 void slideUP(){
     if (!canOperateUp()){
+        printf("can't move up!"); 
         return;
     }
     moveUp();
@@ -410,6 +411,7 @@ void slideUP(){
 
 void slideDOWN(){
     if (!canOperateDown()){
+        printf("can't move down!"); 
         return;
     }
     moveDown();
@@ -424,6 +426,7 @@ void slideDOWN(){
 
 void slideLEFT(){
     if (!canOperateLeft()){
+        printf("can't move to left!"); 
         return;
     }
     moveLeft();
@@ -438,6 +441,7 @@ void slideLEFT(){
 
 void slideRIGHT(){
     if (!canOperateRight()){
+        printf("can't move to right!"); 
         return;
     }
     moveRight();
