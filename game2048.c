@@ -262,7 +262,7 @@ typedef struct game_state{
 
 //write file
 void save_game_in_file(const Game_states* game){
-    FILE * file=fopen("game_state.txt","w");
+    FILE * file=fopen("game_state.bin","wb");
     if(file==NULL){
         printf("Error:Unable to save the game state\n");
         return;
@@ -277,7 +277,7 @@ void save_game_in_file(const Game_states* game){
 //load game
 //if can find and read the file return true, otherwise return false
 bool load_game(Game_states* game){
-    FILE * file=fopen("game_state.txt","r");
+    FILE * file=fopen("game_state.bin","rb");
     if(file==NULL){
         printf("Error:Unable to load the game state\n");
         return false;
