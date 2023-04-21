@@ -267,7 +267,7 @@ void save_game_in_file(const Game_states* game){
         printf("Error:Unable to save the game state\n");
         return;
     }
-   size_t items_written= fwrite(game,sizeof(Game_states),1,file);
+    size_t items_written= fwrite(game,sizeof(Game_states),1,file);
     if (items_written != 1) {
         perror("Error: fwrite failed");
     }
